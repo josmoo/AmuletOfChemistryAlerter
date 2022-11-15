@@ -19,24 +19,25 @@ public interface AoCAlerterConfig extends Config
 	}
 
 	@ConfigItem(
-		keyName = "breakNotify",
-		name = "Notify sound on break",
-		description = "Notify user when amulet of chemistry breaks by sound",
+		keyName = "notify",
+		name = "Notify user",
+		description = "Notify user when matching unfinished potions to secondaries are in inventory",
 		position = 2
 	)
-	default boolean breakNotifySound()
+	default boolean alert()
 	{
 		return true;
 	}
 
 	@ConfigItem(
-		keyName = "breakNotify",
-		name = "Notify flash on break",
-		description = "Notify user when amulet of chemistry breaks by screen flash",
+		keyName = "potionsToAlert",
+		name = "Potions to Alert For",
+		description = "Enter the names of the potions that you would like to be alerted for when attempting to amke them without an AoC",
 		position = 3
 	)
-	default boolean breakNotifyFlash()
+	default String desiredList()
 	{
-		return true;
+		return "";
 	}
 }
+

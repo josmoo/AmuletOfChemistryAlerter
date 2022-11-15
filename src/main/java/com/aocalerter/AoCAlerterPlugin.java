@@ -46,10 +46,27 @@ public class AoCAlerterPlugin extends Plugin
 	@Inject
 	private Notifier notifier;
 
+	private boolean AoCEquipped;
+
 	//private classtype counter this needs to be done at some point TODO todo
-//todo i just finished htis map so now we need to write a function that chekcs neck for aoc, theninventory for the keys
-// , and for each found key,
-	//check inventory for values. then alert
+	//todo we need to make a display box for the aoc if the user wants it
+
+	//todo different ways to allow user to select which potions they want to recieve alerts for:
+	//string to compare (would have to make another level of the map, adding map of string to map
+	//allow a drop down or maybe juts a bunch of checkboxes
+	//that have different potions marked
+		//the problem with this is how would I change the map?
+			//one solution is to literally change the map? that sounds fucking hard
+		//other solution is also a dropdown
+
+	//could potentially split the map from maps to sets to maps to ints, then treat each map like a separate potion that
+	//the user can tick and untick
+		//what is the impact of this on existing code
+			//
+
+	//HIDDEN OPTION: todo One check box that specifies only to equip it when it would provide profit for the user todo
+		//this is the one to do for sure
+
 	private static final Map<Integer, Set<Integer>> UNF_POTION_TO_SECONDARIES = ImmutableMap.<Integer, Set<Integer>>builder()
 		.put(ItemID.ANTIDOTE1_5958, ImmutableSet.of(ItemID.ZULRAHS_SCALES))
 		.put(ItemID.ANTIDOTE2_5956, ImmutableSet.of(ItemID.ZULRAHS_SCALES))
@@ -113,23 +130,40 @@ public class AoCAlerterPlugin extends Plugin
 		.build();
 
 	@Override
-	protected void startUp() throws Exception
+	protected void startUp()
 	{
 		clientThread.invokeLater(() -> {
-			final ItemContainer container = client.getItemContainer(InventoryID.EQUIPMENT);
-			if (container != null)
+			final ItemContainer container = client.getItemContainer(InventoryID.INVENTORY);
+			if (containerHasMatch(container, UNF_POTION_TO_SECONDARIES))
 			{
-				checkNeck(container.getItems());
+				checkAoC(client.getItemContainer(InventoryID.EQUIPMENT).getItems());
 			}
 		});
+
 	}
 
-	private void checkNeck(final Item[] items)
+	//pre: only called if matching unf to secondary is in inventory (only time we care if aoc is equipped)
+	private void checkAoC(final Item[] items)
 	{
 		if (items[EquipmentInventorySlot.AMULET.getSlotIdx()].getId() == 21163)
 		{
 			return;
-		} //if there is an AoC equipped
+		}
+		if(config.alert()){
+			notifier.notify("You don't have an Amulet of Chemistry!");
+		}
+	}
+
+	@Subscribe
+	void onItemContainerChanged(ItemContainerChanged event)
+	{
+		final int changedContainerId = event.getContainerId();
+		//if the item container that was changed is neither the inventory nor the equipment
+		if (changedContainerId != InventoryID.INVENTORY.getId() && changedContainerId != InventoryID.EQUIPMENT.getId())
+		{
+			return;
+		}
+		startUp();
 	}
 
 	@Override
@@ -137,21 +171,6 @@ public class AoCAlerterPlugin extends Plugin
 	{
 		log.info("Example stopped!");
 	}
-
-	@Subscribe//this isnt needed
-	public void onGameStateChanged(GameStateChanged gameStateChanged)
-	{
-		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
-		{
-			//client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Example says " + config.greeting(), null);
-		}
-	}
-
-	private void checkForUnfinishedPotions()
-	{
-		//boolean hasUnfinishedPotions = containerHasAnyId(client.getItemContainer(InventoryID.INVENTORY), UNF_POTION_IDS);
-	}
-
 
 	//check the container for a matching pair of unfinished potions and secondaries
 	private static boolean containerHasMatch(@Nullable final ItemContainer container, final Map<Integer, Set<Integer>> unfToSecondaries)
