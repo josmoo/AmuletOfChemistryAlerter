@@ -4,36 +4,25 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup("aocalerter")
+@ConfigGroup(AoCAlerterConfig.CONFIG_GROUP)
 public interface AoCAlerterConfig extends Config
 {
+	String CONFIG_GROUP = "aocalerter";
 	@ConfigItem(
-		keyName = "aocChargeCounter",
-		name = "Show remaining charges",
-		description = "Show remaining charges of amulet of chemistry",
+		keyName = "useIDList",
+		name = "Notify by ID",
+		description = "Only notify for a list of IDs",
 		position = 1
 	)
-	default boolean aocChargeCounter()
+	default boolean useIDList()
 	{
-		return true;
+		return false;
 	}
-
-	@ConfigItem(
-		keyName = "notify",
-		name = "Notify user",
-		description = "Notify user when matching unfinished potions to secondaries are in inventory",
-		position = 2
-	)
-	default boolean alert()
-	{
-		return true;
-	}
-
 	@ConfigItem(
 		keyName = "potionsToAlert",
-		name = "Potions to Alert For",
-		description = "Enter the names of the potions that you would like to be alerted for when attempting to amke them without an AoC",
-		position = 3
+		name = "IDs to notify",
+		description = "The IDs of the potions that you would like to be alerted for",
+		position = 2
 	)
 	default String desiredList()
 	{

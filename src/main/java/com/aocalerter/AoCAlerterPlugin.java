@@ -3,10 +3,14 @@ package com.aocalerter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Provides;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.ChatMessageType;
@@ -18,6 +22,7 @@ import net.runelite.api.events.GameStateChanged;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.Notifier;
 import net.runelite.client.plugins.Plugin;
@@ -34,9 +39,6 @@ public class AoCAlerterPlugin extends Plugin
 	@Inject
 	private AoCAlerterConfig config;
 
-	//@Inject
-	//private InfoBoxManager infoBoxManager;
-
 	@Inject
 	private ItemManager itemManager;
 
@@ -46,26 +48,7 @@ public class AoCAlerterPlugin extends Plugin
 	@Inject
 	private Notifier notifier;
 
-	private boolean AoCEquipped;
-
-	//private classtype counter this needs to be done at some point TODO todo
-	//todo we need to make a display box for the aoc if the user wants it
-
-	//todo different ways to allow user to select which potions they want to recieve alerts for:
-	//string to compare (would have to make another level of the map, adding map of string to map
-	//allow a drop down or maybe juts a bunch of checkboxes
-	//that have different potions marked
-		//the problem with this is how would I change the map?
-			//one solution is to literally change the map? that sounds fucking hard
-		//other solution is also a dropdown
-
-	//could potentially split the map from maps to sets to maps to ints, then treat each map like a separate potion that
-	//the user can tick and untick
-		//what is the impact of this on existing code
-			//
-
-	//HIDDEN OPTION: todo One check box that specifies only to equip it when it would provide profit for the user todo
-		//this is the one to do for sure
+	public ArrayList<Integer> unfPotIds = new ArrayList<Integer>();
 
 	private static final Map<Integer, Set<Integer>> UNF_POTION_TO_SECONDARIES = ImmutableMap.<Integer, Set<Integer>>builder()
 		.put(ItemID.ANTIDOTE1_5958, ImmutableSet.of(ItemID.ZULRAHS_SCALES))
@@ -132,25 +115,26 @@ public class AoCAlerterPlugin extends Plugin
 	@Override
 	protected void startUp()
 	{
+		unfPotIds.clear();
+		splitIdList(config.desiredList(), unfPotIds);
 		clientThread.invokeLater(() -> {
-			final ItemContainer container = client.getItemContainer(InventoryID.INVENTORY);
-			if (containerHasMatch(container, UNF_POTION_TO_SECONDARIES))
+			final ItemContainer inventory = client.getItemContainer(InventoryID.INVENTORY);
+			if (containerHasMatch(inventory, UNF_POTION_TO_SECONDARIES))
 			{
-				checkAoC(client.getItemContainer(InventoryID.EQUIPMENT).getItems());
+				checkAoC();
 			}
 		});
 
+
 	}
 
-	//pre: only called if matching unf to secondary is in inventory (only time we care if aoc is equipped)
-	private void checkAoC(final Item[] items)
+
+	private void checkAoC()
 	{
-		if (items[EquipmentInventorySlot.AMULET.getSlotIdx()].getId() == 21163)
+		ItemContainer itemContainer = client.getItemContainer(InventoryID.EQUIPMENT);
+		if (itemContainer == null || itemContainer.getItems()[EquipmentInventorySlot.AMULET.getSlotIdx()].getId() != 21163)
 		{
-			return;
-		}
-		if(config.alert()){
-			notifier.notify("You don't have an Amulet of Chemistry!");
+			notifier.notify("You don't have an Amulet of Chemistry equipped!");
 		}
 	}
 
@@ -163,28 +147,74 @@ public class AoCAlerterPlugin extends Plugin
 		{
 			return;
 		}
-		startUp();
+		clientThread.invokeLater(() -> {
+			final ItemContainer container = client.getItemContainer(InventoryID.INVENTORY);
+			if (containerHasMatch(container, UNF_POTION_TO_SECONDARIES))
+			{
+				checkAoC();
+			}
+		});
+	}
+
+	//from:https://github.com/MoreBuchus/buchus-plugins/blob/61c894cc8ee0214920d6bdbaf5750190820a290c/src/main/java/com/betternpchighlight/BetterNpcHighlightPlugin.java#L199
+	private void splitIdList(String configStr, ArrayList<Integer> idList)
+	{
+		if (!configStr.equals(""))
+		{
+			for (String str : configStr.split(","))
+			{
+				if (!str.trim().equals(""))
+				{
+					try
+					{
+						idList.add(Integer.parseInt(str.trim()));
+					}
+					catch (Exception ex)
+					{
+						log.info("AoC Alerter: " + ex.getMessage());
+					}
+				}
+			}
+		}
 	}
 
 	@Override
 	protected void shutDown() throws Exception
 	{
-		log.info("Example stopped!");
+		unfPotIds.clear();
 	}
 
 	//check the container for a matching pair of unfinished potions and secondaries
-	private static boolean containerHasMatch(@Nullable final ItemContainer container, final Map<Integer, Set<Integer>> unfToSecondaries)
+	private boolean containerHasMatch(@Nullable final ItemContainer container, final Map<Integer, Set<Integer>> unfToSecondaries)
 	{
 		if (container == null)
 		{
 			return false;
 		}
 
-		for (Map.Entry<Integer, Set<Integer>> entry : unfToSecondaries.entrySet()) //for every unfinished potion
+		if(!config.useIDList()) //if the user doesn't specify a list of IDs to check, then we'll check all unf potions
 		{
-			if (container.contains(entry.getKey())) //if we have the unfinished potion
+			for (Map.Entry<Integer, Set<Integer>> entry : unfToSecondaries.entrySet()) //for every unfinished potion
 			{
-				for (int secondary : entry.getValue())//for every secondary of that unfinished potion
+				if (container.contains(entry.getKey())) //if we have the unfinished potion
+				{
+					for (int secondary : entry.getValue())//for every secondary of that unfinished potion
+					{
+						if (container.contains(secondary)) //if we have that secondary
+						{
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		}
+		//otherwise the user does have a specific list,
+		for(int desiredID : unfPotIds) //for each ID they want checked
+		{
+			if(container.contains(desiredID)) //if the ID is in the inventory
+			{
+				for(int secondary : unfToSecondaries.get(desiredID)) //for each secondary of that ID
 				{
 					if (container.contains(secondary)) //if we have that secondary
 					{
@@ -196,9 +226,21 @@ public class AoCAlerterPlugin extends Plugin
 		return false;
 	}
 
+	@Subscribe
+	public void onConfigChanged(ConfigChanged event)
+	{
+		if (event.getGroup().equals(config.CONFIG_GROUP))
+		{
+			unfPotIds.clear();
+			splitIdList(config.desiredList(), unfPotIds);
+		}
+	}
+
 	@Provides
-	AoCAlerterConfig provideConfig(ConfigManager configManager)
+	AoCAlerterConfig providesConfig(ConfigManager configManager)
 	{
 		return configManager.getConfig(AoCAlerterConfig.class);
 	}
+
+
 }
