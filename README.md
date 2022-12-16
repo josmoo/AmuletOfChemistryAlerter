@@ -3,7 +3,7 @@ Tired of making potions without an amulet of chemistry? Stop wasting potential s
 
 This plugin will alert you when you're about to make potions without an amulet of chemistry
 
-If you want to use the "Notify by ID" feature, use the tables below. Enter the ID for the primary potion ingredient (usually unf potions and finished potions), separated by commas
+If you want to use the "Notify by ID" feature, use the tables below. Enter the ID for the primary potion ingredient separated by commas
 
 | **Unfinished Potion**  | **ID** |
 | -------------- | ------- |
