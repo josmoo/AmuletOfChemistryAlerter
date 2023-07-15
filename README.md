@@ -25,6 +25,10 @@ If you want to use the "Notify by ID" feature, use the tables below. Enter the I
 
 | **Finished Potion**  | **ID** |
 | -------------- | ------- |
+| Ancient brew(1) | 26346 |
+| Ancient brew(2) | 26344 |
+| Ancient brew(3) | 26342 |
+| Ancient brew(4) | 26340 |
 | Antidote++(1) | 5958 |
 | Antidote++(2) | 5956 |
 | Antidote++(3) | 5954 |
