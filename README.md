@@ -5,6 +5,8 @@ This plugin will alert you when you're about to make potions without an amulet o
 
 If you want to use the "Notify by ID" feature, use the tables below. Enter the ID for the primary potion ingredient separated by commas
 
+If it's still confusing this [little tutorial video](https://youtu.be/WdPJVY7ndzw) might help
+
 | **Unfinished Potion**  | **ID** |
 | -------------- | ------- |
 | Avantoe potion (unf) | 103 |
