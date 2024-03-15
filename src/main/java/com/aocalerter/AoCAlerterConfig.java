@@ -28,5 +28,26 @@ public interface AoCAlerterConfig extends Config
 	{
 		return "";
 	}
+	@ConfigItem(
+		keyName = "useIgnoreList",
+		name = "Ignore by ID",
+		description = "Never notify for a list of IDs",
+		position = 3
+	)
+	default boolean useIgnoreList()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "potionsToIgnore",
+		name = "IDs to ignore",
+		description = "The IDs of the potions that you never want to be alerted for",
+		position = 4
+	)
+	default String ignoreList()
+	{
+		return "";
+	}
 }
 

@@ -48,7 +48,9 @@ public class AoCAlerterPlugin extends Plugin
 	@Inject
 	private Notifier notifier;
 
-	public ArrayList<Integer> unfPotIds = new ArrayList<Integer>();
+	public ArrayList<Integer> desiredIDs = new ArrayList<Integer>();
+
+	public ArrayList<Integer> ignoreIDs = new ArrayList<Integer>();
 
 	private static final Map<Integer, Set<Integer>> UNF_POTION_TO_SECONDARIES = ImmutableMap.<Integer, Set<Integer>>builder()
 			.put(ItemID.ANCIENT_BREW1, ImmutableSet.of(ItemID.ANCIENT_ESSENCE))
@@ -118,8 +120,10 @@ public class AoCAlerterPlugin extends Plugin
 	@Override
 	protected void startUp()
 	{
-		unfPotIds.clear();
-		splitIdList(config.desiredList(), unfPotIds);
+		desiredIDs.clear();
+		splitIdList(config.desiredList(), desiredIDs);
+		ignoreIDs.clear();
+		splitIdList(config.ignoreList(), ignoreIDs);
 		clientThread.invokeLater(() -> {
 			final ItemContainer inventory = client.getItemContainer(InventoryID.INVENTORY);
 			if (containerHasMatch(inventory, UNF_POTION_TO_SECONDARIES))
@@ -184,7 +188,8 @@ public class AoCAlerterPlugin extends Plugin
 	@Override
 	protected void shutDown() throws Exception
 	{
-		unfPotIds.clear();
+		desiredIDs.clear();
+		ignoreIDs.clear();
 	}
 
 	//check the container for a matching pair of unfinished potions and secondaries
@@ -195,13 +200,55 @@ public class AoCAlerterPlugin extends Plugin
 			return false;
 		}
 
-		if(!config.useIDList()) //if the user doesn't specify a list of IDs to check, then we'll check all unf potions
+		if(!config.useIDList()) //if the user doesn't specify a list of IDs to check,
 		{
-			for (Map.Entry<Integer, Set<Integer>> entry : unfToSecondaries.entrySet()) //for every unfinished potion
+			if(!config.useIgnoreList())// and doesn't want to ignore any IDs, then we'll check all unf potions
 			{
-				if (container.contains(entry.getKey())) //if we have the unfinished potion
+				for (Map.Entry<Integer, Set<Integer>> entry : unfToSecondaries.entrySet()) //for every unfinished potion
 				{
-					for (int secondary : entry.getValue())//for every secondary of that unfinished potion
+					if (container.contains(entry.getKey())) //if we have the unfinished potion
+					{
+						for (int secondary : entry.getValue())//for every secondary of that unfinished potion
+						{
+							if (container.contains(secondary)) //if we have that secondary
+							{
+								return true;
+							}
+						}
+					}
+				}
+				return false;
+			}
+			//otherwise the user doesn't specify a desired list, but does specify an ignore list
+			for(Map.Entry<Integer, Set<Integer>> entry : unfToSecondaries.entrySet()) //for every unfinished potion
+			{
+				for(int ignoreID : ignoreIDs) //for all the IDs the user wants ignored
+					{
+					if( entry.getKey() != ignoreID) //if the potion isn't one to be ignored
+					{
+						if (container.contains(entry.getKey())) //if we have the unfinished potion
+						{
+							for (int secondary : entry.getValue())//for every secondary of that unfinished potion
+							{
+								if (container.contains(secondary)) //if we have that secondary
+								{
+									return true;
+								}
+							}
+						}
+					}
+				}
+			return false;
+			}
+		}
+		//otherwise the user does have a desired list,
+		if(!config.useIgnoreList())// and doesn't want to ignore any IDs, then we'll check all unf potions
+		{
+			for (int desiredID : desiredIDs) //for each ID they want checked
+			{
+				if (container.contains(desiredID)) //if the ID is in the inventory
+				{
+					for (int secondary : unfToSecondaries.get(desiredID)) //for each secondary of that ID
 					{
 						if (container.contains(secondary)) //if we have that secondary
 						{
@@ -212,16 +259,22 @@ public class AoCAlerterPlugin extends Plugin
 			}
 			return false;
 		}
-		//otherwise the user does have a specific list,
-		for(int desiredID : unfPotIds) //for each ID they want checked
+		//otherwise the user does have an ignore list
+		for (int desiredID : desiredIDs) //for each ID they want checked
 		{
-			if(container.contains(desiredID)) //if the ID is in the inventory
+			for (int ignoreID : ignoreIDs)//for all the IDs the user wants ignored
 			{
-				for(int secondary : unfToSecondaries.get(desiredID)) //for each secondary of that ID
+				if (desiredID != ignoreID)//if the potion isn't one to be ignored
 				{
-					if (container.contains(secondary)) //if we have that secondary
+					if (container.contains(desiredID)) //if the ID is in the inventory
 					{
-						return true;
+						for (int secondary : unfToSecondaries.get(desiredID)) //for each secondary of that ID
+						{
+							if (container.contains(secondary)) //if we have that secondary
+							{
+								return true;
+							}
+						}
 					}
 				}
 			}
@@ -234,8 +287,10 @@ public class AoCAlerterPlugin extends Plugin
 	{
 		if (event.getGroup().equals(config.CONFIG_GROUP))
 		{
-			unfPotIds.clear();
-			splitIdList(config.desiredList(), unfPotIds);
+			desiredIDs.clear();
+			splitIdList(config.desiredList(), desiredIDs);
+			ignoreIDs.clear();
+			splitIdList(config.ignoreList(), ignoreIDs);
 		}
 	}
 
