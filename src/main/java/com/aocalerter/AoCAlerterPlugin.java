@@ -151,9 +151,10 @@ public class AoCAlerterPlugin extends Plugin
 	private boolean nearBank()
 	{
 		WorldView worldView = client.getTopLevelWorldView();
+		Tile[][] currentPlane = worldView.getScene().getTiles()[worldView.getPlane()];
 		return (worldView.npcs().stream().map(NPC::getName).filter(Objects::nonNull).map(String::toLowerCase)
 				.anyMatch(name-> name.contains("banker"))
-				|| Arrays.stream(worldView.getScene().getTiles()).flatMap(Arrays::stream).flatMap(Arrays::stream).filter(Objects::nonNull)
+				|| Arrays.stream(currentPlane).flatMap(Arrays::stream).filter(Objects::nonNull)
 				.map(Tile::getGameObjects).flatMap(Arrays::stream).filter(Objects::nonNull).map(TileObject::getId)
 				.map(id -> client.getObjectDefinition(id)).map(ObjectComposition::getName).map(String::toLowerCase)
 				.anyMatch(name -> name.startsWith("bank")));
