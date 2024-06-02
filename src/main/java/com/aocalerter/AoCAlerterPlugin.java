@@ -3,30 +3,22 @@ package com.aocalerter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Provides;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
-import net.runelite.api.ChatMessageType;
-import net.runelite.api.Client;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ItemContainerChanged;
-import net.runelite.api.GameState;
-import net.runelite.api.ItemID;
-import net.runelite.api.events.GameStateChanged;
+import net.runelite.client.Notifier;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.ItemManager;
-import net.runelite.client.Notifier;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import java.util.*;
 
 
 @Slf4j
@@ -117,6 +109,8 @@ public class AoCAlerterPlugin extends Plugin
 			.put(ItemID.GUTHIX_BALANCE_UNF_7658, ImmutableSet.of(ItemID.SILVER_DUST))
 			.build();
 
+
+
 	@Override
 	protected void startUp()
 	{
@@ -136,6 +130,35 @@ public class AoCAlerterPlugin extends Plugin
 	}
 
 
+	@Subscribe
+	void onItemContainerChanged(ItemContainerChanged event)
+	{
+		final int changedContainerId = event.getContainerId();
+
+		//we only care about changes to inventory and equipment
+		if (changedContainerId == InventoryID.INVENTORY.getId() || changedContainerId == InventoryID.EQUIPMENT.getId()) {
+			if(!config.activeNearBank() || nearBank()) {
+				clientThread.invokeLater(() -> {
+					final ItemContainer container = client.getItemContainer(InventoryID.INVENTORY);
+					if (containerHasMatch(container, UNF_POTION_TO_SECONDARIES)) {
+						checkAoC();
+					}
+				});
+			}
+		}
+	}
+
+	private boolean nearBank()
+	{
+		WorldView worldView = client.getTopLevelWorldView();
+		return (worldView.npcs().stream().map(NPC::getName).filter(Objects::nonNull).map(String::toLowerCase)
+				.anyMatch(name-> name.contains("banker"))
+				|| Arrays.stream(worldView.getScene().getTiles()).flatMap(Arrays::stream).flatMap(Arrays::stream).filter(Objects::nonNull)
+				.map(Tile::getGameObjects).flatMap(Arrays::stream).filter(Objects::nonNull).map(TileObject::getId)
+				.map(id -> client.getObjectDefinition(id)).map(ObjectComposition::getName).map(String::toLowerCase)
+				.anyMatch(name -> name.startsWith("bank")));
+	}
+
 	private void checkAoC()
 	{
 		ItemContainer itemContainer = client.getItemContainer(InventoryID.EQUIPMENT);
@@ -143,24 +166,6 @@ public class AoCAlerterPlugin extends Plugin
 		{
 			notifier.notify("You don't have an Amulet of Chemistry equipped!");
 		}
-	}
-
-	@Subscribe
-	void onItemContainerChanged(ItemContainerChanged event)
-	{
-		final int changedContainerId = event.getContainerId();
-		//if the item container that was changed is neither the inventory nor the equipment
-		if (changedContainerId != InventoryID.INVENTORY.getId() && changedContainerId != InventoryID.EQUIPMENT.getId())
-		{
-			return;
-		}
-		clientThread.invokeLater(() -> {
-			final ItemContainer container = client.getItemContainer(InventoryID.INVENTORY);
-			if (containerHasMatch(container, UNF_POTION_TO_SECONDARIES))
-			{
-				checkAoC();
-			}
-		});
 	}
 
 	//from:https://github.com/MoreBuchus/buchus-plugins/blob/61c894cc8ee0214920d6bdbaf5750190820a290c/src/main/java/com/betternpchighlight/BetterNpcHighlightPlugin.java#L199
@@ -282,6 +287,11 @@ public class AoCAlerterPlugin extends Plugin
 		return false;
 	}
 
+	public boolean nearABank(){
+		WorldPoint playerPos = client.getLocalPlayer().getWorldLocation();
+		return true;
+	}
+
 	@Subscribe
 	public void onConfigChanged(ConfigChanged event)
 	{
@@ -299,6 +309,4 @@ public class AoCAlerterPlugin extends Plugin
 	{
 		return configManager.getConfig(AoCAlerterConfig.class);
 	}
-
-
 }

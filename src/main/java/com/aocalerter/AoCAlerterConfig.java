@@ -8,11 +8,22 @@ import net.runelite.client.config.ConfigItem;
 public interface AoCAlerterConfig extends Config
 {
 	String CONFIG_GROUP = "aocalerter";
+
+	@ConfigItem(
+			keyName = "activeNearBank",
+			name = "Only active near bank",
+			description = "Only alert when a bank chest or bank teller is rendered",
+			position = 1
+	)
+	default boolean activeNearBank()
+	{
+		return true;
+	}
 	@ConfigItem(
 		keyName = "useIDList",
 		name = "Notify by ID",
 		description = "Only notify for a list of IDs",
-		position = 1
+		position = 2
 	)
 	default boolean useIDList()
 	{
@@ -22,7 +33,7 @@ public interface AoCAlerterConfig extends Config
 		keyName = "potionsToAlert",
 		name = "IDs to notify",
 		description = "The IDs of the potions that you would like to be alerted for",
-		position = 2
+		position = 3
 	)
 	default String desiredList()
 	{
@@ -32,7 +43,7 @@ public interface AoCAlerterConfig extends Config
 		keyName = "useIgnoreList",
 		name = "Ignore by ID",
 		description = "Never notify for a list of IDs",
-		position = 3
+		position = 4
 	)
 	default boolean useIgnoreList()
 	{
@@ -43,7 +54,7 @@ public interface AoCAlerterConfig extends Config
 		keyName = "potionsToIgnore",
 		name = "IDs to ignore",
 		description = "The IDs of the potions that you never want to be alerted for",
-		position = 4
+		position = 5
 	)
 	default String ignoreList()
 	{
