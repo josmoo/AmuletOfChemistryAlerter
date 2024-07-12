@@ -20,10 +20,7 @@ import net.runelite.client.plugins.PluginDescriptor;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 @Slf4j
@@ -239,30 +236,32 @@ public class AoCAlerterPlugin extends Plugin
 		splitIdList(config.ignoreList(), ignoreIDs);
 		clientThread.invokeLater(() -> {
 			final ItemContainer inventory = client.getItemContainer(InventoryID.INVENTORY);
-			if (containerHasMatch(inventory, UNF_POTION_TO_SECONDARIES))
+			if (containerHasMatch(inventory))
 			{
 				checkAoC();
 			}
 		});
 	}
 
-
 	@Subscribe
 	void onItemContainerChanged(ItemContainerChanged event)
 	{
 		final int changedContainerId = event.getContainerId();
 
-		//we only care about changes to inventory and equipment
-		if (changedContainerId == InventoryID.INVENTORY.getId() || changedContainerId == InventoryID.EQUIPMENT.getId()) {
-			if(!config.activeNearBank() || nearABank()) {
-				clientThread.invokeLater(() -> {
-					final ItemContainer container = client.getItemContainer(InventoryID.INVENTORY);
-					if (containerHasMatch(container, UNF_POTION_TO_SECONDARIES)) {
-						checkAoC();
-					}
-				});
-			}
+		if (changedContainerId != InventoryID.INVENTORY.getId() && changedContainerId != InventoryID.EQUIPMENT.getId()) {
+			return;
 		}
+
+		if(config.activeNearBank() && !nearABank()) {
+			return;
+		}
+
+		clientThread.invokeLater(() -> {
+			final ItemContainer container = client.getItemContainer(InventoryID.INVENTORY);
+			if (containerHasMatch(container)) {
+				checkAoC();
+			}
+		});
 	}
 
 	private void checkAoC()
@@ -277,20 +276,22 @@ public class AoCAlerterPlugin extends Plugin
 	//from:https://github.com/MoreBuchus/buchus-plugins/blob/61c894cc8ee0214920d6bdbaf5750190820a290c/src/main/java/com/betternpchighlight/BetterNpcHighlightPlugin.java#L199
 	private void splitIdList(String configStr, ArrayList<Integer> idList)
 	{
-		if (!configStr.equals(""))
+		if (configStr.equals(""))
 		{
-			for (String str : configStr.split(","))
+			return;
+		}
+
+		for (String str : configStr.split(","))
+		{
+			if (!str.trim().equals(""))
 			{
-				if (!str.trim().equals(""))
+				try
 				{
-					try
-					{
-						idList.add(Integer.parseInt(str.trim()));
-					}
-					catch (Exception ex)
-					{
-						log.info("AoC Alerter: " + ex.getMessage());
-					}
+					idList.add(Integer.parseInt(str.trim()));
+				}
+				catch (Exception ex)
+				{
+					log.info("AoC Alerter: " + ex.getMessage());
 				}
 			}
 		}
@@ -303,94 +304,18 @@ public class AoCAlerterPlugin extends Plugin
 		ignoreIDs.clear();
 	}
 
-	//check the container for a matching pair of unfinished potions and secondaries
-	private boolean containerHasMatch(@Nullable final ItemContainer container, final Map<Integer, Set<Integer>> unfToSecondaries)
+	private boolean containerHasMatch(@Nullable final ItemContainer container)
 	{
 		if (container == null)
 		{
 			return false;
 		}
 
-		if(!config.useIDList()) //if the user doesn't specify a list of IDs to check,
-		{
-			if(!config.useIgnoreList())// and doesn't want to ignore any IDs, then we'll check all unf potions
-			{
-				for (Map.Entry<Integer, Set<Integer>> entry : unfToSecondaries.entrySet()) //for every unfinished potion
-				{
-					if (container.contains(entry.getKey())) //if we have the unfinished potion
-					{
-						for (int secondary : entry.getValue())//for every secondary of that unfinished potion
-						{
-							if (container.contains(secondary)) //if we have that secondary
-							{
-								return true;
-							}
-						}
-					}
-				}
-				return false;
-			}
-			//otherwise the user doesn't specify a desired list, but does specify an ignore list
-			for(Map.Entry<Integer, Set<Integer>> entry : unfToSecondaries.entrySet()) //for every unfinished potion
-			{
-				for(int ignoreID : ignoreIDs) //for all the IDs the user wants ignored
-					{
-					if( entry.getKey() != ignoreID) //if the potion isn't one to be ignored
-					{
-						if (container.contains(entry.getKey())) //if we have the unfinished potion
-						{
-							for (int secondary : entry.getValue())//for every secondary of that unfinished potion
-							{
-								if (container.contains(secondary)) //if we have that secondary
-								{
-									return true;
-								}
-							}
-						}
-					}
-				}
-			return false;
-			}
-		}
-		//otherwise the user does have a desired list,
-		if(!config.useIgnoreList())// and doesn't want to ignore any IDs, then we'll check all unf potions
-		{
-			for (int desiredID : desiredIDs) //for each ID they want checked
-			{
-				if (container.contains(desiredID)) //if the ID is in the inventory
-				{
-					for (int secondary : unfToSecondaries.get(desiredID)) //for each secondary of that ID
-					{
-						if (container.contains(secondary)) //if we have that secondary
-						{
-							return true;
-						}
-					}
-				}
-			}
-			return false;
-		}
-		//otherwise the user does have an ignore list
-		for (int desiredID : desiredIDs) //for each ID they want checked
-		{
-			for (int ignoreID : ignoreIDs)//for all the IDs the user wants ignored
-			{
-				if (desiredID != ignoreID)//if the potion isn't one to be ignored
-				{
-					if (container.contains(desiredID)) //if the ID is in the inventory
-					{
-						for (int secondary : unfToSecondaries.get(desiredID)) //for each secondary of that ID
-						{
-							if (container.contains(secondary)) //if we have that secondary
-							{
-								return true;
-							}
-						}
-					}
-				}
-			}
-		}
-		return false;
+		return Arrays.stream(container.getItems()).map(Item::getId).filter(id ->
+				(!config.useIgnoreList() || !ignoreIDs.contains(id))
+				&& (!config.useIDList() || desiredIDs.contains(id))
+				&& UNF_POTION_TO_SECONDARIES.containsKey(id))
+				.map(UNF_POTION_TO_SECONDARIES::get).flatMap(Collection::stream).anyMatch(container::contains);
 	}
 
 	public boolean nearABank(){
