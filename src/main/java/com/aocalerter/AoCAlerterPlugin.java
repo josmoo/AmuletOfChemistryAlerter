@@ -276,9 +276,15 @@ public class AoCAlerterPlugin extends Plugin
 	private void checkAoC()
 	{
 		ItemContainer itemContainer = client.getItemContainer(InventoryID.EQUIPMENT);
-		if (itemContainer == null || itemContainer.getItems()[EquipmentInventorySlot.AMULET.getSlotIdx()].getId() != 21163)
+		if (itemContainer == null)
 		{
-			notifier.notify("You don't have an Amulet of Chemistry equipped!");
+			notifier.notify("You don't have an Amulet of Chemistry/Alchemy equipped!");
+			return;
+		}
+
+		int amuletId = itemContainer.getItems()[EquipmentInventorySlot.AMULET.getSlotIdx()].getId();
+		if(amuletId != 21163 && amuletId != ItemID.ALCHEMISTS_AMULET_29990) {
+			notifier.notify("You don't have an Amulet of Chemistry/Alchemy equipped!");
 		}
 	}
 
