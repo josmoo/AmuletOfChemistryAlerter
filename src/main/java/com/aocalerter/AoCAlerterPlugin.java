@@ -286,7 +286,7 @@ public class AoCAlerterPlugin extends Plugin
 		}
 
 		int amuletId = itemContainer.getItems()[EquipmentInventorySlot.AMULET.getSlotIdx()].getId();
-		if(amuletId != 21163 && amuletId != ItemID.ALCHEMISTS_AMULET_29990) {
+		if(amuletId != ItemID.AMULET_OF_CHEMISTRY && amuletId != ItemID.ALCHEMISTS_AMULET_29990) {
 			notifier.notify("You don't have an Amulet of Chemistry/Alchemy equipped!");
 		}
 	}
