@@ -86,7 +86,14 @@ public class AoCAlerterPlugin extends Plugin
 			new WorldArea(1797, 3782, 12, 12, 0), // Port Piscarilius bank
 			new WorldArea(1799, 9495, 12, 12, 0), // Fortis Colosseum#Lobby area|Fortis Colosseum chest
 			new WorldArea(1803, 3561, 12, 12, 0), // Vinery#Bank chest|Vinery chest
+			new WorldArea(1877, 3310, 12, 12, 0), // Port Robers Bank
+			new WorldArea(1930, 2748, 12, 12, 0), // Deepfin Point|Deepfin Point bank chest
+			new WorldArea(2005, 9179, 12, 12, 0), // Deepfin Mine|Deepfin Mine west bank chest
+			new WorldArea(2087, 9191, 12, 12, 0), // Deepfin Mine|Deepfin Mine west bank chest
 			new WorldArea(2095, 3913, 12, 12, 0), // Lunar Isle bank
+			new WorldArea(2091, 3681, 12, 12, 0), // Buccaneers' Haven|Buccaneers' Haven bank chest
+			new WorldArea(2188, 2308, 12, 12, 0), // Sunbleak Island|Sunbleak Island bank chest
+			new WorldArea(2274, 2538, 12, 12, 0), // Bank boat|The Shrouded Ocean bank boat
 			new WorldArea(2324, 3684, 12, 12, 0), // Piscatoris bank
 			new WorldArea(2331, 3801, 12, 12, 0), // Neitiznot bank
 			new WorldArea(2346, 3156, 12, 12, 0), // Lletya bank
@@ -106,6 +113,7 @@ public class AoCAlerterPlugin extends Plugin
 			new WorldArea(2611, 3327, 12, 12, 0), // Ardougne north bank
 			new WorldArea(2614, 3889, 12, 12, 0), // Etceteria bank
 			new WorldArea(2647, 3278, 12, 12, 0), // Ardougne south bank
+			new WorldArea(2649, 2381, 12, 12, 0), // Charred Island|Charred Island bank chest
 			new WorldArea(2656, 3155, 12, 12, 0), // Port Khazard#Bank chest|Port Khazard chest
 			new WorldArea(2661, 2647, 12, 12, 0), // Void Knights' Outpost bank
 			new WorldArea(2696, 5344, 12, 12, 0), // Dorgesh-Kaan bank
@@ -123,9 +131,11 @@ public class AoCAlerterPlugin extends Plugin
 			new WorldArea(2940, 3361, 12, 12, 0), // Falador west bank
 			new WorldArea(2964, 3336, 12, 12, 0), // PvP world#Bank chests|Falador PvP chest
 			new WorldArea(2972, 5793, 12, 12, 0), // Ruins of Camdozaal#Bank|Camdozaal chest
+			new WorldArea(2979, 2262, 12, 12, 0), // The Onyx Crest|The Onyx Crest bank chest
 			new WorldArea(3006, 9712, 12, 12, 0), // Mining Guild#Bank chest|Mining Guild chest
 			new WorldArea(3009, 3351, 12, 12, 0), // Falador east bank
 			new WorldArea(3010, 5619, 12, 12, 0), // Ourania Altar|Ourania bank
+			new WorldArea(3033, 2994, 12, 12, 0), // The Pandemonium|The Pandemonium Bank Crab
 			new WorldArea(3036, 4966, 12, 12, 0), // Emerald Benedict|Emerald Benedict's bank
 			new WorldArea(3084, 3950, 12, 12, 0), // Mage Arena bank
 			new WorldArea(3087, 3238, 12, 12, 0), // Draynor bank
@@ -138,6 +148,7 @@ public class AoCAlerterPlugin extends Plugin
 			new WorldArea(3142, 3442, 12, 12, 0), // Cooks' Guild#Bank|Cook's Guild bank
 			new WorldArea(3150, 2831, 12, 12, 0), // Ruins of Unkah#Bank|Unkah chest
 			new WorldArea(3159, 3484, 12, 12, 0), // Grand Exchange
+			new WorldArea(3176, 2413, 12, 12, 0), // The Great Conch bank
 			new WorldArea(3179, 3435, 12, 12, 0), // Varrock west bank
 			new WorldArea(3189, 4564, 12, 12, 0), // Odovacar|Tarn's Lair bank
 			new WorldArea(3203, 3213, 12, 12, 2), // Lumbridge Castle bank
@@ -200,7 +211,7 @@ public class AoCAlerterPlugin extends Plugin
 			.put(ItemID.SUPER_ATTACK2, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
 			.put(ItemID.SUPER_ATTACK3, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
 			.put(ItemID.SUPER_COMBAT_POTION1, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
-			.put(ItemID.SUPER_COMBAT_POTION2, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
+				.put(ItemID.SUPER_COMBAT_POTION2, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
 			.put(ItemID.SUPER_COMBAT_POTION3, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
 			.put(ItemID.SUPER_DEFENCE1, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
 			.put(ItemID.SUPER_DEFENCE2, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
