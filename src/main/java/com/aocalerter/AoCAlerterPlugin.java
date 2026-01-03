@@ -5,7 +5,13 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.*;
+import net.runelite.api.Client;
+import net.runelite.api.Item;
+import net.runelite.api.EquipmentInventorySlot;
+import net.runelite.api.gameval.InventoryID;
+import net.runelite.api.ItemContainer;
+import net.runelite.api.gameval.ItemID;
+import net.runelite.api.gameval.ItemID.*;
 import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ItemContainerChanged;
@@ -183,69 +189,72 @@ public class AoCAlerterPlugin extends Plugin
 
 
 	private static final Map<Integer, Set<Integer>> UNF_POTION_TO_SECONDARIES = ImmutableMap.<Integer, Set<Integer>>builder()
-			.put(ItemID.ANCIENT_BREW1, ImmutableSet.of(ItemID.ANCIENT_ESSENCE))
-			.put(ItemID.ANCIENT_BREW2, ImmutableSet.of(ItemID.ANCIENT_ESSENCE))
-			.put(ItemID.ANCIENT_BREW3, ImmutableSet.of(ItemID.ANCIENT_ESSENCE))
-			.put(ItemID.ANTIDOTE1_5958, ImmutableSet.of(ItemID.ZULRAHS_SCALES))
-			.put(ItemID.ANTIDOTE2_5956, ImmutableSet.of(ItemID.ZULRAHS_SCALES))
-			.put(ItemID.ANTIDOTE3_5954, ImmutableSet.of(ItemID.ZULRAHS_SCALES))
-			.put(ItemID.ANTIFIRE_POTION1, ImmutableSet.of(ItemID.LAVA_SCALE_SHARD))
-			.put(ItemID.ANTIFIRE_POTION2, ImmutableSet.of(ItemID.LAVA_SCALE_SHARD))
-			.put(ItemID.ANTIFIRE_POTION3, ImmutableSet.of(ItemID.LAVA_SCALE_SHARD))
-			.put(ItemID.BASTION_POTION1, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
-			.put(ItemID.BASTION_POTION2, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
-			.put(ItemID.BASTION_POTION3, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
-			.put(ItemID.BATTLEMAGE_POTION1, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
-			.put(ItemID.BATTLEMAGE_POTION2, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
-			.put(ItemID.BATTLEMAGE_POTION3, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
-			.put(ItemID.MAGIC_POTION1, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
-			.put(ItemID.MAGIC_POTION2, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
-			.put(ItemID.MAGIC_POTION3, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
-			.put(ItemID.RANGING_POTION1, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
-			.put(ItemID.RANGING_POTION2, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
-			.put(ItemID.RANGING_POTION3, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
-			.put(ItemID.SUPER_ANTIFIRE_POTION1, ImmutableSet.of(ItemID.LAVA_SCALE_SHARD))
-			.put(ItemID.SUPER_ANTIFIRE_POTION2, ImmutableSet.of(ItemID.LAVA_SCALE_SHARD))
-			.put(ItemID.SUPER_ANTIFIRE_POTION3, ImmutableSet.of(ItemID.LAVA_SCALE_SHARD))
-			.put(ItemID.SUPER_ATTACK1, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
-			.put(ItemID.SUPER_ATTACK2, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
-			.put(ItemID.SUPER_ATTACK3, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
-			.put(ItemID.SUPER_COMBAT_POTION1, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
-				.put(ItemID.SUPER_COMBAT_POTION2, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
-			.put(ItemID.SUPER_COMBAT_POTION3, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
-			.put(ItemID.SUPER_DEFENCE1, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
-			.put(ItemID.SUPER_DEFENCE2, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
-			.put(ItemID.SUPER_DEFENCE3, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
-			.put(ItemID.SUPER_ENERGY1, ImmutableSet.of(ItemID.AMYLASE_CRYSTAL))
-			.put(ItemID.SUPER_ENERGY2, ImmutableSet.of(ItemID.AMYLASE_CRYSTAL))
-			.put(ItemID.SUPER_ENERGY3, ImmutableSet.of(ItemID.AMYLASE_CRYSTAL))
-			.put(ItemID.SUPER_STRENGTH1, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
-			.put(ItemID.SUPER_STRENGTH2, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
-			.put(ItemID.SUPER_STRENGTH3, ImmutableSet.of(ItemID.CRYSTAL_DUST_23964))
+			.put(ItemID._1DOSEANCIENTBREW, ImmutableSet.of(ItemID.ANCIENT_ESSENCE))
+			.put(ItemID._2DOSEANCIENTBREW, ImmutableSet.of(ItemID.ANCIENT_ESSENCE))
+			.put(ItemID._3DOSEANCIENTBREW, ImmutableSet.of(ItemID.ANCIENT_ESSENCE))
+			.put(ItemID.ANTIDOTE__1, ImmutableSet.of(ItemID.SNAKEBOSS_SCALE))
+			.put(ItemID.ANTIDOTE__2, ImmutableSet.of(ItemID.SNAKEBOSS_SCALE))
+			.put(ItemID.ANTIDOTE__3, ImmutableSet.of(ItemID.SNAKEBOSS_SCALE))
+			.put(ItemID._1DOSE1ANTIDRAGON, ImmutableSet.of(ItemID.LAVA_SHARD))
+			.put(ItemID._2DOSE1ANTIDRAGON, ImmutableSet.of(ItemID.LAVA_SHARD))
+			.put(ItemID._3DOSE1ANTIDRAGON, ImmutableSet.of(ItemID.LAVA_SHARD))
+			.put(ItemID._1DOSE3ANTIDRAGON, ImmutableSet.of(ItemID.LAVA_SHARD))
+			.put(ItemID._2DOSE3ANTIDRAGON, ImmutableSet.of(ItemID.LAVA_SHARD))
+			.put(ItemID._3DOSE3ANTIDRAGON, ImmutableSet.of(ItemID.LAVA_SHARD))
+			.put(ItemID._1DOSEBASTION, ImmutableSet.of(ItemID.PRIF_CRYSTAL_SHARD_CRUSHED))
+			.put(ItemID._2DOSEBASTION, ImmutableSet.of(ItemID.PRIF_CRYSTAL_SHARD_CRUSHED))
+			.put(ItemID._3DOSEBASTION, ImmutableSet.of(ItemID.PRIF_CRYSTAL_SHARD_CRUSHED))
+			.put(ItemID._1DOSEBATTLEMAGE, ImmutableSet.of(ItemID.PRIF_CRYSTAL_SHARD_CRUSHED))
+			.put(ItemID._2DOSEBATTLEMAGE, ImmutableSet.of(ItemID.PRIF_CRYSTAL_SHARD_CRUSHED))
+			.put(ItemID._3DOSEBATTLEMAGE, ImmutableSet.of(ItemID.PRIF_CRYSTAL_SHARD_CRUSHED))
+			.put(ItemID._1DOSE1MAGIC, ImmutableSet.of(ItemID.PRIF_CRYSTAL_SHARD_CRUSHED))
+			.put(ItemID._2DOSE1MAGIC, ImmutableSet.of(ItemID.PRIF_CRYSTAL_SHARD_CRUSHED))
+			.put(ItemID._3DOSE1MAGIC, ImmutableSet.of(ItemID.PRIF_CRYSTAL_SHARD_CRUSHED))
+			.put(ItemID._1DOSERANGERSPOTION, ImmutableSet.of(ItemID.PRIF_CRYSTAL_SHARD_CRUSHED))
+			.put(ItemID._2DOSERANGERSPOTION, ImmutableSet.of(ItemID.PRIF_CRYSTAL_SHARD_CRUSHED))
+			.put(ItemID._3DOSERANGERSPOTION, ImmutableSet.of(ItemID.PRIF_CRYSTAL_SHARD_CRUSHED))
+			.put(ItemID._1DOSE2ATTACK, ImmutableSet.of(ItemID.PRIF_CRYSTAL_SHARD_CRUSHED))
+			.put(ItemID._2DOSE2ATTACK, ImmutableSet.of(ItemID.PRIF_CRYSTAL_SHARD_CRUSHED))
+			.put(ItemID._3DOSE2ATTACK, ImmutableSet.of(ItemID.PRIF_CRYSTAL_SHARD_CRUSHED))
+			.put(ItemID._1DOSE2COMBAT, ImmutableSet.of(ItemID.PRIF_CRYSTAL_SHARD_CRUSHED))
+			.put(ItemID._2DOSE2COMBAT, ImmutableSet.of(ItemID.PRIF_CRYSTAL_SHARD_CRUSHED))
+			.put(ItemID._3DOSE2COMBAT, ImmutableSet.of(ItemID.PRIF_CRYSTAL_SHARD_CRUSHED))
+			.put(ItemID._1DOSE2DEFENSE, ImmutableSet.of(ItemID.PRIF_CRYSTAL_SHARD_CRUSHED))
+			.put(ItemID._2DOSE2DEFENSE, ImmutableSet.of(ItemID.PRIF_CRYSTAL_SHARD_CRUSHED))
+			.put(ItemID._3DOSE2DEFENSE, ImmutableSet.of(ItemID.PRIF_CRYSTAL_SHARD_CRUSHED))
+			.put(ItemID._1DOSE2ENERGY, ImmutableSet.of(ItemID.AMYLASE, ItemID.YELLOW_FIN))
+			.put(ItemID._2DOSE2ENERGY, ImmutableSet.of(ItemID.AMYLASE, ItemID.YELLOW_FIN))
+			.put(ItemID._3DOSE2ENERGY, ImmutableSet.of(ItemID.AMYLASE, ItemID.YELLOW_FIN))
+			.put(ItemID._1DOSE2STRENGTH, ImmutableSet.of(ItemID.PRIF_CRYSTAL_SHARD_CRUSHED))
+			.put(ItemID._2DOSE2STRENGTH , ImmutableSet.of(ItemID.PRIF_CRYSTAL_SHARD_CRUSHED))
+			.put(ItemID._3DOSE2STRENGTH , ImmutableSet.of(ItemID.PRIF_CRYSTAL_SHARD_CRUSHED))
 
-			.put(ItemID.AVANTOE_POTION_UNF, ImmutableSet.of(ItemID.KEBBIT_TEETH_DUST, ItemID.MORT_MYRE_FUNGUS, ItemID.SNAPE_GRASS))
-			.put(ItemID.CADANTINE_BLOOD_POTION_UNF, ImmutableSet.of(ItemID.POTATO_CACTUS, ItemID.WINE_OF_ZAMORAK))
-			.put(ItemID.CADANTINE_POTION_UNF, ImmutableSet.of(ItemID.POTATO_CACTUS, ItemID.WHITE_BERRIES, ItemID.WINE_OF_ZAMORAK))
-			.put(ItemID.DWARF_WEED_POTION_UNF, ImmutableSet.of(ItemID.LILY_OF_THE_SANDS, ItemID.NIHIL_DUST, ItemID.WINE_OF_ZAMORAK))
-			.put(ItemID.GUAM_POTION_UNF, ImmutableSet.of(ItemID.EYE_OF_NEWT))
-			.put(ItemID.HARRALANDER_POTION_UNF, ImmutableSet.of(ItemID.CHOCOLATE_DUST, ItemID.GOAT_HORN_DUST, ItemID.RED_SPIDERS_EGGS, ItemID.VOLCANIC_ASH, ItemID.ALDARIUM))
-			.put(ItemID.IRIT_POTION_UNF, ImmutableSet.of(ItemID.EYE_OF_NEWT, ItemID.UNICORN_HORN_DUST))
-			.put(ItemID.KWUARM_POTION_UNF, ImmutableSet.of(ItemID.LIMPWURT_ROOT))
-			.put(ItemID.LANTADYME_POTION_UNF, ImmutableSet.of(ItemID.DRAGON_SCALE_DUST, ItemID.POTATO_CACTUS))
-			.put(ItemID.MARRENTILL_POTION_UNF, ImmutableSet.of(ItemID.UNICORN_HORN_DUST))
-			.put(ItemID.RANARR_POTION_UNF, ImmutableSet.of(ItemID.SNAPE_GRASS, ItemID.WHITE_BERRIES))
-			.put(ItemID.SNAPDRAGON_POTION_UNF, ImmutableSet.of(ItemID.RED_SPIDERS_EGGS))
-			.put(ItemID.TARROMIN_POTION_UNF, ImmutableSet.of(ItemID.ASHES, ItemID.LIMPWURT_ROOT))
-			.put(ItemID.TOADFLAX_POTION_UNF, ImmutableSet.of(ItemID.CRUSHED_NEST, ItemID.PHARMAKOS_BERRIES, ItemID.TOADS_LEGS))
-			.put(ItemID.TORSTOL_POTION_UNF, ImmutableSet.of(ItemID.JANGERBERRIES, ItemID.DEMONIC_TALLOW))
-			.put(ItemID.HUASCA_POTION_UNF, ImmutableSet.of(ItemID.ALDARIUM))
+			.put(ItemID.AVANTOEVIAL, ImmutableSet.of(ItemID.HUNTINGBEAST_SABRETEETH_DUST, ItemID.MORTMYREMUSHROOM, ItemID.SNAPE_GRASS))
+			.put(ItemID.CADANTINE_BLOODVIAL, ImmutableSet.of(ItemID.CACTUS_POTATO, ItemID.WINE_OF_ZAMORAK))
+			.put(ItemID.CADANTINEVIAL, ImmutableSet.of(ItemID.CACTUS_POTATO, ItemID.WHITE_BERRIES, ItemID.WINE_OF_ZAMORAK))
+			.put(ItemID.DWARFWEEDVIAL, ImmutableSet.of(ItemID.LILY_OF_THE_SANDS, ItemID.NIHIL_DUST, ItemID.WINE_OF_ZAMORAK))
+			.put(ItemID.GUAMVIAL, ImmutableSet.of(ItemID.EYE_OF_NEWT))
+			.put(ItemID.HARRALANDERVIAL, ImmutableSet.of(ItemID.CHOCOLATE_DUST, ItemID.GROUND_DESERT_GOAT_HORN, ItemID.RED_SPIDERS_EGGS, ItemID.FOSSIL_VOLCANIC_ASH, ItemID.ALDARIUM))
+			.put(ItemID.HUASCAVIAL, ImmutableSet.of(ItemID.ALDARIUM))
+			.put(ItemID.IRITVIAL, ImmutableSet.of(ItemID.EYE_OF_NEWT, ItemID.UNICORN_HORN_DUST))
+			.put(ItemID.KWUARMVIAL, ImmutableSet.of(ItemID.LIMPWURT_ROOT))
+			.put(ItemID.LANTADYMEVIAL, ImmutableSet.of(ItemID.DRAGON_SCALE_DUST, ItemID.CACTUS_POTATO))
+			.put(ItemID.MARRENTILLVIAL, ImmutableSet.of(ItemID.UNICORN_HORN_DUST))
+			.put(ItemID.PILLARVIAL, ImmutableSet.of(ItemID.HADDOCK_EYE, ItemID.CRAB_PASTE))
+			.put(ItemID.RANARRVIAL, ImmutableSet.of(ItemID.SNAPE_GRASS, ItemID.WHITE_BERRIES))
+			.put(ItemID.SNAPDRAGONVIAL, ImmutableSet.of(ItemID.RED_SPIDERS_EGGS))
+			.put(ItemID.TARROMINVIAL, ImmutableSet.of(ItemID.ASHES, ItemID.LIMPWURT_ROOT))
+			.put(ItemID.TOADFLAXVIAL, ImmutableSet.of(ItemID.CRUSHED_BIRD_NEST, ItemID.LOTG_PHARMAKOS_BERRY, ItemID.TOADS_LEGS))
+			.put(ItemID.TORSTOLVIAL, ImmutableSet.of(ItemID.JANGERBERRIES, ItemID.DEMONIC_TALLOW))
+			.put(ItemID.UMBRALVIAL, ImmutableSet.of(ItemID.RAINBOW_CRAB_PASTE))
 
-			.put(ItemID.MIXTURE__STEP_21, ImmutableSet.of(ItemID.NAIL_BEAST_NAILS))
-			.put(ItemID.MIXTURE__STEP_22, ImmutableSet.of(ItemID.NAIL_BEAST_NAILS))
-			.put(ItemID.MIXTURE__STEP_23, ImmutableSet.of(ItemID.NAIL_BEAST_NAILS))
-			.put(ItemID.GUTHIX_BALANCE_UNF_7654, ImmutableSet.of(ItemID.SILVER_DUST))
-			.put(ItemID.GUTHIX_BALANCE_UNF_7656, ImmutableSet.of(ItemID.SILVER_DUST))
-			.put(ItemID.GUTHIX_BALANCE_UNF_7658, ImmutableSet.of(ItemID.SILVER_DUST))
+
+			.put(ItemID.SANFEW_SALVE_STEP_2_1_DOSE, ImmutableSet.of(ItemID.NAIL_BEAST_NAIL))
+			.put(ItemID.SANFEW_SALVE_STEP_2_2_DOSE, ImmutableSet.of(ItemID.NAIL_BEAST_NAIL))
+			.put(ItemID.SANFEW_SALVE_STEP_2_3_DOSE, ImmutableSet.of(ItemID.NAIL_BEAST_NAIL))
+			.put(ItemID.BURGH_UNFINISHED_GUTHIX_BALANCE_1, ImmutableSet.of(ItemID.SILVER_DUST))
+			.put(ItemID.BURGH_UNFINISHED_GUTHIX_BALANCE_2, ImmutableSet.of(ItemID.SILVER_DUST))
+			.put(ItemID.BURGH_UNFINISHED_GUTHIX_BALANCE_3, ImmutableSet.of(ItemID.SILVER_DUST))
 			.build();
 
 
@@ -258,7 +267,7 @@ public class AoCAlerterPlugin extends Plugin
 		ignoreIDs.clear();
 		splitIdList(config.ignoreList(), ignoreIDs);
 		clientThread.invokeLater(() -> {
-			final ItemContainer inventory = client.getItemContainer(InventoryID.INVENTORY);
+			final ItemContainer inventory = client.getItemContainer(InventoryID.INV);
 			if (containerHasMatch(inventory))
 			{
 				checkAoC();
@@ -271,7 +280,7 @@ public class AoCAlerterPlugin extends Plugin
 	{
 		final int changedContainerId = event.getContainerId();
 
-		if (changedContainerId != InventoryID.INVENTORY.getId() && changedContainerId != InventoryID.EQUIPMENT.getId()) {
+		if (changedContainerId != InventoryID.INV && changedContainerId != InventoryID.WORN) {
 			return;
 		}
 
@@ -280,7 +289,7 @@ public class AoCAlerterPlugin extends Plugin
 		}
 
 		clientThread.invokeLater(() -> {
-			final ItemContainer container = client.getItemContainer(InventoryID.INVENTORY);
+			final ItemContainer container = client.getItemContainer(InventoryID.INV);
 			if (containerHasMatch(container)) {
 				checkAoC();
 			}
@@ -289,7 +298,7 @@ public class AoCAlerterPlugin extends Plugin
 
 	private void checkAoC()
 	{
-		ItemContainer itemContainer = client.getItemContainer(InventoryID.EQUIPMENT);
+		ItemContainer itemContainer = client.getItemContainer(InventoryID.WORN);
 		if (itemContainer == null)
 		{
 			notifier.notify("You don't have an Amulet of Chemistry/Alchemy equipped!");
@@ -297,7 +306,7 @@ public class AoCAlerterPlugin extends Plugin
 		}
 
 		int amuletId = itemContainer.getItems()[EquipmentInventorySlot.AMULET.getSlotIdx()].getId();
-		if(amuletId != ItemID.AMULET_OF_CHEMISTRY && amuletId != ItemID.ALCHEMISTS_AMULET_29990) {
+		if(amuletId != ItemID.AMULET_OF_CHEMISTRY && amuletId != ItemID.AMULET_OF_CHEMISTRY_IMBUED_CHARGED) {
 			notifier.notify("You don't have an Amulet of Chemistry/Alchemy equipped!");
 		}
 	}
