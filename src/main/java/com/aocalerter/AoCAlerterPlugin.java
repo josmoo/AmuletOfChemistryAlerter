@@ -296,18 +296,28 @@ public class AoCAlerterPlugin extends Plugin
 		});
 	}
 
+	private void notifyMissingAmulet(){
+		notifier.notify("You don't have an Amulet of Chemistry/Alchemy equipped!");
+	}
+
 	private void checkAoC()
 	{
 		ItemContainer itemContainer = client.getItemContainer(InventoryID.WORN);
 		if (itemContainer == null)
 		{
-			notifier.notify("You don't have an Amulet of Chemistry/Alchemy equipped!");
+			notifyMissingAmulet();
 			return;
 		}
 
-		int amuletId = itemContainer.getItems()[EquipmentInventorySlot.AMULET.getSlotIdx()].getId();
+		Item amulet = itemContainer.getItem(EquipmentInventorySlot.AMULET.getSlotIdx());
+		if(amulet == null){
+			notifyMissingAmulet();
+			return;
+		}
+
+		int amuletId = amulet.getId();
 		if(amuletId != ItemID.AMULET_OF_CHEMISTRY && amuletId != ItemID.AMULET_OF_CHEMISTRY_IMBUED_CHARGED) {
-			notifier.notify("You don't have an Amulet of Chemistry/Alchemy equipped!");
+			notifyMissingAmulet();
 		}
 	}
 
