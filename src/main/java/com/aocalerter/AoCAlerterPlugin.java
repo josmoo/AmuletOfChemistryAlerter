@@ -310,7 +310,7 @@ public class AoCAlerterPlugin extends Plugin
 
 	private void notifyMissingAmulet(){
 		final String message = "You don't have an Amulet of Chemistry/Alchemy equipped!";
-		notifier.notify(config.enableTrayNotifications(), message);
+		notifier.notify(config.enableNotifications(), message);
 	}
 
 	private void checkAoC()

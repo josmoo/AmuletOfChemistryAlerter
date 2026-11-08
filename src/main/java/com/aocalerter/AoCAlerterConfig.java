@@ -63,14 +63,14 @@ public interface AoCAlerterConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "enableTrayNotifications",
-			name = "Configure notifications",
-			description = "Enable configurable tray notifications when an Amulet of Chemistry is missing",
+			keyName = "enableNotifications",
+			name = "Enable notifications",
+			description = "Enable notifications when an Amulet of Chemistry is missing",
 			position = 6
 	)
-	default Notification enableTrayNotifications()
+	default Notification enableNotifications()
 	{
-		return Notification.OFF;
+		return Notification.ON;
 	}
 }
 
