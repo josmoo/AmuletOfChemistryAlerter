@@ -3,6 +3,7 @@ package com.aocalerter;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.Notification;
 
 @ConfigGroup(AoCAlerterConfig.CONFIG_GROUP)
 public interface AoCAlerterConfig extends Config
@@ -59,6 +60,17 @@ public interface AoCAlerterConfig extends Config
 	default String ignoreList()
 	{
 		return "";
+	}
+
+	@ConfigItem(
+			keyName = "enableTrayNotifications",
+			name = "Enable tray notifications",
+			description = "Enable configurable tray notifications when an Amulet of Chemistry is missing",
+			position = 6
+	)
+	default Notification enableTrayNotifications()
+	{
+		return Notification.OFF;
 	}
 }
 

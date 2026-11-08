@@ -18,6 +18,7 @@ import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.client.Notifier;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.config.Notification;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.ItemManager;
@@ -297,7 +298,14 @@ public class AoCAlerterPlugin extends Plugin
 	}
 
 	private void notifyMissingAmulet(){
-		notifier.notify("You don't have an Amulet of Chemistry/Alchemy equipped!");
+		final String message = "You don't have an Amulet of Chemistry/Alchemy equipped!";
+		notifier.notify(message);
+
+		final Notification trayNotification = config.enableTrayNotifications();
+		if (trayNotification.isEnabled())
+		{
+			notifier.notify(trayNotification, message);
+		}
 	}
 
 	private void checkAoC()
