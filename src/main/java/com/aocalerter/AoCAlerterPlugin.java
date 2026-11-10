@@ -48,6 +48,8 @@ public class AoCAlerterPlugin extends Plugin
 	@Inject
 	private Notifier notifier;
 
+	private boolean missingAmuletNotified;
+
 	public ArrayList<Integer> desiredIDs = new ArrayList<Integer>();
 
 	public ArrayList<Integer> ignoreIDs = new ArrayList<Integer>();
@@ -262,6 +264,7 @@ public class AoCAlerterPlugin extends Plugin
 	@Override
 	protected void startUp()
 	{
+		missingAmuletNotified = false;
 		desiredIDs.clear();
 		splitIdList(config.desiredList(), desiredIDs);
 		ignoreIDs.clear();
@@ -271,6 +274,10 @@ public class AoCAlerterPlugin extends Plugin
 			if (containerHasMatch(inventory))
 			{
 				checkAoC();
+			}
+			else
+			{
+				missingAmuletNotified = false;
 			}
 		});
 	}
@@ -285,6 +292,7 @@ public class AoCAlerterPlugin extends Plugin
 		}
 
 		if(config.activeNearBank() && !nearABank()) {
+			missingAmuletNotified = false;
 			return;
 		}
 
@@ -293,32 +301,32 @@ public class AoCAlerterPlugin extends Plugin
 			if (containerHasMatch(container)) {
 				checkAoC();
 			}
+			else
+			{
+				missingAmuletNotified = false;
+			}
 		});
 	}
 
 	private void notifyMissingAmulet(){
-		notifier.notify("You don't have an Amulet of Chemistry/Alchemy equipped!");
+		final String message = "You don't have an Amulet of Chemistry/Alchemy equipped!";
+		notifier.notify(config.enableNotifications(), message);
 	}
 
 	private void checkAoC()
 	{
-		ItemContainer itemContainer = client.getItemContainer(InventoryID.WORN);
-		if (itemContainer == null)
+		final ItemContainer equipment = client.getItemContainer(InventoryID.WORN);
+		final Item amulet = equipment == null ? null : equipment.getItem(EquipmentInventorySlot.AMULET.getSlotIdx());
+		final boolean missingAmulet = amulet == null
+				|| (amulet.getId() != ItemID.AMULET_OF_CHEMISTRY
+				&& amulet.getId() != ItemID.AMULET_OF_CHEMISTRY_IMBUED_CHARGED);
+
+		if (missingAmulet && !missingAmuletNotified)
 		{
 			notifyMissingAmulet();
-			return;
 		}
 
-		Item amulet = itemContainer.getItem(EquipmentInventorySlot.AMULET.getSlotIdx());
-		if(amulet == null){
-			notifyMissingAmulet();
-			return;
-		}
-
-		int amuletId = amulet.getId();
-		if(amuletId != ItemID.AMULET_OF_CHEMISTRY && amuletId != ItemID.AMULET_OF_CHEMISTRY_IMBUED_CHARGED) {
-			notifyMissingAmulet();
-		}
+		missingAmuletNotified = missingAmulet;
 	}
 
 	//from:https://github.com/MoreBuchus/buchus-plugins/blob/61c894cc8ee0214920d6bdbaf5750190820a290c/src/main/java/com/betternpchighlight/BetterNpcHighlightPlugin.java#L199
@@ -348,6 +356,7 @@ public class AoCAlerterPlugin extends Plugin
 	@Override
 	protected void shutDown() throws Exception
 	{
+		missingAmuletNotified = false;
 		desiredIDs.clear();
 		ignoreIDs.clear();
 	}
